@@ -28,6 +28,13 @@ wall-clock-24h
 
 システムのタイムゾーンを表示し、現在時の数字を強調します。
 
+## 版の種類
+
+このリポジトリには、次の2種類が含まれています。
+
+- `pipx` でインストールして `wall-clock-24h` として起動する PySide6 アプリ版
+- ブラウザで開いて使えるスタンドアロン HTML 版 [wall-clock-24h.html](wall-clock-24h.html)
+
 ## ライセンス
 
 `wall-clock-24h` は [MIT](https://spdx.org/licenses/MIT.html) ライセンスのもとで配布されています。

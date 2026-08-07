@@ -28,6 +28,13 @@ The window has no frame and uses a translucent background. You can:
 
 The clock displays the system time zone and highlights the current hour.
 
+## Editions
+
+This repository contains two editions:
+
+- the PySide6 desktop application, installed with `pipx` and launched as `wall-clock-24h`;
+- the standalone browser version in [wall-clock-24h.html](wall-clock-24h.html).
+
 ## License
 
 `wall-clock-24h` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
