@@ -95,16 +95,21 @@ class WallClock(QWidget):
         gradient_radius = radius - side * 0.012
 
         afternoon = now.hour >= 12
-        # Qt's conical gradient is reversed relative to CSS.  With 90° and
-        # the stops below, the 12 o'clock position is the stop at 1.0 and
-        # the color changes clockwise toward the stop at 0.0.
+        # Qt's conical gradient is reversed relative to CSS.  The .75 point
+        # corresponds to 3 o'clock.  Keep 12--15 (afternoon) or 0--3
+        # (morning) flat, and only grade the remaining 3-to-12 segment.
         gradient = QConicalGradient(center, 90)
         if afternoon:
             gradient.setColorAt(0.0, QColor("#dddddd"))
+            gradient.setColorAt(0.74, QColor("#ffffff"))
+            gradient.setColorAt(0.76, QColor("#ffffff"))
             gradient.setColorAt(1.0, QColor("#ffffff"))
         else:
             gradient.setColorAt(0.0, QColor("#ffffff"))
-            gradient.setColorAt(1.0, QColor("#dddddd"))
+            gradient.setColorAt(0.74, QColor("#dddddd"))
+            gradient.setColorAt(0.76, QColor("#dddddd"))
+            gradient.setColorAt(0.999, QColor("#dddddd"))
+            gradient.setColorAt(1.0, QColor("#ffffff"))
 
         dial = QRectF(center.x() - gradient_radius, center.y() - gradient_radius,
                       2 * gradient_radius, 2 * gradient_radius)
