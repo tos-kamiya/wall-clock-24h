@@ -34,7 +34,7 @@ class WallClock(QWidget):
 
         self._menu_button = QToolButton(self)
         self._menu_button.setText("☰")
-        self._menu_button.setToolTip("メニュー")
+        self._menu_button.setToolTip("Menu")
         self._menu_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self._menu_button.setFixedSize(36, 36)
         self._menu_button.setStyleSheet(
@@ -60,11 +60,11 @@ class WallClock(QWidget):
             "QMenu::item { padding: 7px 28px 7px 16px; }"
             "QMenu::item:selected { background: #e9eaeb; }"
         )
-        version_action = QAction("バージョン情報", menu)
+        version_action = QAction("About", menu)
         version_action.triggered.connect(self._show_version)
         menu.addAction(version_action)
         menu.addSeparator()
-        quit_action = QAction("終了", menu)
+        quit_action = QAction("Quit", menu)
         quit_action.triggered.connect(self.close)
         menu.addAction(quit_action)
         menu.exec(self._menu_button.mapToGlobal(QPoint(0, self._menu_button.height())))
@@ -72,8 +72,8 @@ class WallClock(QWidget):
     def _show_version(self) -> None:
         QMessageBox.information(
             self,
-            "バージョン情報",
-            f"24-hour Wall Clock\nバージョン {__version__}",
+            "About",
+            f"24-hour Wall Clock\nVersion {__version__}",
         )
 
     def paintEvent(self, _event: object) -> None:
@@ -138,7 +138,6 @@ class WallClock(QWidget):
                                    2 * face_radius, 2 * face_radius))
 
         self._draw_ticks(painter, center, gradient_radius)
-        self._draw_labels(painter, center, gradient_radius, now.hour)
 
         seconds = now.second + now.microsecond / 1_000_000
         minutes = now.minute + seconds / 60
@@ -148,7 +147,7 @@ class WallClock(QWidget):
         self._draw_hand(painter, center, radius * 0.51, radius * 0.042, hours12 * 30,
                         QColor("#202226"), shadow_alpha=46)
         self._draw_hand(painter, center, radius * 0.73, radius * 0.0264, minutes * 6,
-                        QColor("#34383d"), shadow_alpha=36)
+                        QColor("#5d6b78"), shadow_alpha=36)
         self._draw_hand(painter, center, radius * 0.81, radius * 0.0108, seconds * 6,
                         QColor("#d44949"), shadow_alpha=0)
         self._draw_hand(painter, center, radius * 0.18, radius * 0.0108, seconds * 6 + 180,
@@ -158,14 +157,22 @@ class WallClock(QWidget):
         painter.setPen(QPen(QColor("#ffffff"), max(2.0, radius * 0.01)))
         painter.drawEllipse(QRectF(center.x() - radius * 0.024, center.y() - radius * 0.024,
                                    radius * 0.048, radius * 0.048))
+
+        # Keep labels above the hands so they remain legible.
+        self._draw_labels(painter, center, gradient_radius, now.hour)
+
         painter.setPen(QColor("#b4b8bc"))
         font = QFont("Sans Serif")
-        font.setPixelSize(max(8, round(radius * 0.032)))
+        font.setPixelSize(max(8, round(radius * 0.064)))
         font.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, max(1.0, radius * 0.012))
         painter.setFont(font)
-        painter.drawText(QRectF(center.x() - radius * 0.3, center.y() + radius * 0.22,
-                                radius * 0.6, radius * 0.1), Qt.AlignmentFlag.AlignCenter,
-                         now.tzname() or "UTC")
+        timezone_rect = QRectF(center.x() - radius * 0.3, center.y() + radius * 0.22,
+                               radius * 0.6, radius * 0.1)
+        timezone_name = now.tzname() or "UTC"
+        self._draw_outlined_text(
+            painter, timezone_rect, timezone_name, Qt.AlignmentFlag.AlignCenter,
+            QColor("#b4b8bc"), max(2.0, radius * 0.0075)
+        )
 
         # Visual marker for the bottom-right resize grip: two short staple-like
         # diagonal strokes, kept subtle so they do not compete with the dial.
@@ -197,6 +204,22 @@ class WallClock(QWidget):
                                      center.y() + math.sin(angle) * outer))
 
     @staticmethod
+    def _draw_outlined_text(painter: QPainter, rect: QRectF, text: str,
+                            alignment: Qt.AlignmentFlag, foreground: QColor,
+                            outline_width: float) -> None:
+        """Draw text with a visible halo, including on raster paint devices."""
+        painter.setPen(QColor(255, 255, 255, 180))
+        for dx, dy in (
+            (-outline_width, -outline_width), (0.0, -outline_width),
+            (outline_width, -outline_width), (-outline_width, 0.0),
+            (outline_width, 0.0), (-outline_width, outline_width),
+            (0.0, outline_width), (outline_width, outline_width),
+        ):
+            painter.drawText(rect.translated(dx, dy), alignment, text)
+        painter.setPen(foreground)
+        painter.drawText(rect, alignment, text)
+
+    @staticmethod
     def _draw_labels(painter: QPainter, center: QPointF, radius: float, hour: int) -> None:
         font = QFont("Monospace")
         font.setStyleHint(QFont.StyleHint.TypeWriter)
@@ -212,10 +235,14 @@ class WallClock(QWidget):
             displayed = index + 12 if afternoon else index
             font.setWeight(QFont.Weight.Bold if displayed == hour else QFont.Weight.Normal)
             painter.setFont(font)
-            painter.setPen(QColor("#111820" if displayed == hour else "#434a52"))
-            painter.drawText(QRectF(x - radius * 0.15, y - radius * 0.09,
-                                    radius * 0.30, radius * 0.18), Qt.AlignmentFlag.AlignCenter,
-                             str(displayed))
+            label_rect = QRectF(x - radius * 0.15, y - radius * 0.09,
+                                radius * 0.30, radius * 0.18)
+            label_text = str(displayed)
+            WallClock._draw_outlined_text(
+                painter, label_rect, label_text, Qt.AlignmentFlag.AlignCenter,
+                QColor("#111820" if displayed == hour else "#434a52"),
+                max(2.0, radius * 0.010)
+            )
 
     @staticmethod
     def _draw_hand(painter: QPainter, center: QPointF, length: float, width: float,
