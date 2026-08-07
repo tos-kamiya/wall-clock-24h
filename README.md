@@ -1,28 +1,32 @@
 # wall-clock-24h
 
-[![PyPI - Version](https://img.shields.io/pypi/v/wall-clock-24h.svg)](https://pypi.org/project/wall-clock-24h)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/wall-clock-24h.svg)](https://pypi.org/project/wall-clock-24h)
+A frameless, translucent 24-hour wall clock built with PySide6.
 
------
-
-## Table of Contents
-
-- [Installation](#installation)
-- [License](#license)
+![wall-clock-24h screenshot](screenshot1.png)
 
 ## Installation
 
+Install the application with [pipx](https://pipx.pypa.io/) directly from GitHub:
+
 ```console
-pip install wall-clock-24h
+pipx install git+https://github.com/tos-kamiya/wall-clock-24h.git
 ```
 
-起動:
+## Usage
+
+Launch the clock with:
 
 ```console
 wall-clock-24h
 ```
 
-ウィンドウ枠のない半透明アプリとして表示されます。左ドラッグで移動し、右クリックで終了します。
+The window has no frame and uses a translucent background. You can:
+
+- drag the clock with the left mouse button;
+- resize it from the bottom-right corner;
+- open the hamburger menu in the top-left corner to view the version or quit.
+
+The clock displays the system time zone and highlights the current hour.
 
 ## License
 
