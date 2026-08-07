@@ -24,27 +24,39 @@
   }
 
   body {
-    display: grid;
-    place-items: center;
+    position: relative;
     overflow: hidden;
-    background:
-      radial-gradient(circle at 50% 35%, #ffffff 0 12%, transparent 45%),
-      var(--bg);
+    background: rgba(0, 0, 0, .2);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
                  "Yu Gothic UI", "Yu Gothic", sans-serif;
   }
 
   .clock {
-    position: relative;
+    position: absolute;
+    left: 50%;
+    top: 50%;
     width: min(88vmin, 760px);
+    min-width: 280px;
+    min-height: 280px;
     aspect-ratio: 1;
     border-radius: 50%;
-    background: var(--dial-background, var(--clock));
+    background: #f4f4f2;
     border: 1px solid #e4e5e6;
+    transform: translate(-50%, -50%);
+    user-select: none;
     box-shadow:
       0 22px 50px rgba(0,0,0,.10),
       0 3px 10px rgba(0,0,0,.05),
       inset 0 0 0 7px #fafafa;
+  }
+
+  .clock::before {
+    content: "";
+    position: absolute;
+    inset: 1.2%;
+    border-radius: 50%;
+    background: var(--dial-background, #ffffff);
+    pointer-events: none;
   }
 
 
@@ -58,12 +70,14 @@
     border-radius: 50%;
     background: #ffffff;
     pointer-events: none;
+    z-index: 1;
   }
 
   .tick {
     position: absolute;
     inset: 0;
     pointer-events: none;
+    z-index: 2;
   }
 
   .tick::before {
@@ -96,10 +110,16 @@
     display: grid;
     place-items: center;
     color: var(--digital);
-    font: 500 clamp(24px, 5.4vmin, 58px)/1 ui-monospace, SFMono-Regular,
+    font: 500 clamp(29px, 7.8vmin, 70px)/1 ui-monospace, SFMono-Regular,
           Menlo, Monaco, Consolas, "Liberation Mono", monospace;
     letter-spacing: -.06em;
     user-select: none;
+    z-index: 5;
+    text-shadow:
+      -2px -2px 0 rgba(255,255,255,.7), 0 -2px 0 rgba(255,255,255,.7),
+      2px -2px 0 rgba(255,255,255,.7), -2px 0 0 rgba(255,255,255,.7),
+      2px 0 0 rgba(255,255,255,.7), -2px 2px 0 rgba(255,255,255,.7),
+      0 2px 0 rgba(255,255,255,.7), 2px 2px 0 rgba(255,255,255,.7);
   }
 
   .hour-number.active {
@@ -114,31 +134,32 @@
     transform-origin: 50% 100%;
     border-radius: 999px;
     will-change: transform;
+    z-index: 3;
   }
 
   .hour-hand {
     width: 2.10%;
-    height: 25.5%;
+    height: 26.52%;
     margin-left: -1.05%;
-    margin-top: -25.5%;
+    margin-top: -26.52%;
     background: var(--ink);
     box-shadow: 0 1px 2px rgba(0,0,0,.18);
   }
 
   .minute-hand {
     width: 1.32%;
-    height: 36.5%;
+    height: 37.96%;
     margin-left: -0.66%;
-    margin-top: -36.5%;
-    background: #34383d;
+    margin-top: -37.96%;
+    background: #5d6b78;
     box-shadow: 0 1px 2px rgba(0,0,0,.14);
   }
 
   .second-hand {
     width: 0.54%;
-    height: 40.5%;
+    height: 43.38%;
     margin-left: -0.27%;
-    margin-top: -40.5%;
+    margin-top: -43.38%;
     background: var(--second);
   }
 
@@ -152,6 +173,7 @@
     background: var(--second);
     transform-origin: 50% 0;
     will-change: transform;
+    z-index: 3;
   }
 
   .hub {
@@ -165,6 +187,7 @@
     background: var(--ink);
     border: 4px solid #fff;
     box-shadow: 0 1px 5px rgba(0,0,0,.22);
+    z-index: 4;
   }
 
   .brand {
@@ -173,17 +196,20 @@
     top: 61%;
     transform: translateX(-50%);
     color: #b4b8bc;
-    font-size: clamp(8px, 1.2vmin, 11px);
+    font-size: clamp(16px, 2.4vmin, 22px);
     letter-spacing: .18em;
     text-transform: uppercase;
     white-space: nowrap;
+    z-index: 5;
+    text-shadow: 0 0 3px rgba(255,255,255,.8);
   }
+
 </style>
 </head>
 <body>
-  <main class="clock" id="clock" aria-label="24時間表示のアナログ壁掛け時計">
+  <main class="clock" id="clock" aria-label="24-hour analog wall clock">
     <div class="dial-center"></div>
-    <div class="brand">LOCAL TIME</div>
+    <div class="brand" id="timezoneLabel">UTC</div>
     <div class="hand hour-hand" id="hourHand"></div>
     <div class="hand minute-hand" id="minuteHand"></div>
     <div class="hand second-hand" id="secondHand"></div>
@@ -198,6 +224,7 @@
   const minuteHand = document.getElementById("minuteHand");
   const secondHand = document.getElementById("secondHand");
   const secondTail = document.getElementById("secondTail");
+  const timezoneLabel = document.getElementById("timezoneLabel");
 
   // 外周の60目盛り
   for (let i = 0; i < 60; i++) {
@@ -240,17 +267,26 @@
       hourLabels[i].classList.toggle("active", displayedHour === hour24);
     }
 
-    // 文字盤の装飾:
-    // 午後 (12–23): 12時位置の白から、時計回りに徐々にグレーへ。
-    // 午前 (0–11):  0時位置のグレーから、時計回りに徐々に白へ。
+    // Dial decoration: the 12–15 or 0–3 quarter stays flat, and only the
+    // 3-to-12 segment carries the gradient.
     const dialBackground = afternoon
-      ? "conic-gradient(from 0deg, #ffffff 0deg, #dddddd 360deg)"
-      : "conic-gradient(from 0deg, #dddddd 0deg, #ffffff 360deg)";
+      ? "conic-gradient(from 0deg, #ffffff 0deg, #ffffff 90deg, #dddddd 360deg)"
+      : "conic-gradient(from 0deg, #dddddd 0deg, #dddddd 90deg, #ffffff 360deg)";
 
     clock.style.setProperty("--dial-background", dialBackground);
   }
 
+  function getSystemTimeZone(now) {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZoneName: "short"
+    }).formatToParts(now);
+    return parts.find((part) => part.type === "timeZoneName")?.value
+      || Intl.DateTimeFormat().resolvedOptions().timeZone
+      || "UTC";
+  }
+
   let lastHour = -1;
+  let lastTimeZone = "";
 
   function draw() {
     const now = new Date();
@@ -273,6 +309,12 @@
     if (currentHour !== lastHour) {
       updateHourLabels(currentHour);
       lastHour = currentHour;
+    }
+
+    const timeZone = getSystemTimeZone(now);
+    if (timeZone !== lastTimeZone) {
+      timezoneLabel.textContent = timeZone;
+      lastTimeZone = timeZone;
     }
 
     requestAnimationFrame(draw);
