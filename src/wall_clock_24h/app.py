@@ -9,7 +9,9 @@ from datetime import datetime
 from PySide6.QtCore import QPoint, QPointF, QRectF, QTimer, QSize, Qt
 from PySide6.QtGui import (QAction, QColor, QConicalGradient, QFont, QMouseEvent,
                            QPainter, QPen)
-from PySide6.QtWidgets import QApplication, QMenu, QToolButton, QWidget
+from PySide6.QtWidgets import QApplication, QMenu, QMessageBox, QToolButton, QWidget
+
+from .__about__ import __version__
 
 
 class WallClock(QWidget):
@@ -58,10 +60,21 @@ class WallClock(QWidget):
             "QMenu::item { padding: 7px 28px 7px 16px; }"
             "QMenu::item:selected { background: #e9eaeb; }"
         )
+        version_action = QAction("バージョン情報", menu)
+        version_action.triggered.connect(self._show_version)
+        menu.addAction(version_action)
+        menu.addSeparator()
         quit_action = QAction("終了", menu)
         quit_action.triggered.connect(self.close)
         menu.addAction(quit_action)
         menu.exec(self._menu_button.mapToGlobal(QPoint(0, self._menu_button.height())))
+
+    def _show_version(self) -> None:
+        QMessageBox.information(
+            self,
+            "バージョン情報",
+            f"24-hour Wall Clock\nバージョン {__version__}",
+        )
 
     def paintEvent(self, _event: object) -> None:
         now = datetime.now().astimezone()
@@ -152,7 +165,7 @@ class WallClock(QWidget):
         painter.setFont(font)
         painter.drawText(QRectF(center.x() - radius * 0.3, center.y() + radius * 0.22,
                                 radius * 0.6, radius * 0.1), Qt.AlignmentFlag.AlignCenter,
-                         "LOCAL TIME")
+                         now.tzname() or "UTC")
 
         # Visual marker for the bottom-right resize grip: two short staple-like
         # diagonal strokes, kept subtle so they do not compete with the dial.
@@ -189,10 +202,11 @@ class WallClock(QWidget):
         font.setStyleHint(QFont.StyleHint.TypeWriter)
         font.setPixelSize(max(24, round(radius * 0.108 * 1.44)))
         afternoon = hour >= 12
-        label_radius = radius * 0.74 * 0.95
+        # Move the labels 5% outward from their current position, returning
+        # them to the original HTML-aligned radius.
+        label_radius = radius * 0.74
         for index in range(12):
             angle = math.radians(index * 30 - 90)
-            # Move the labels 5% inward from their previous radius.
             x = center.x() + math.cos(angle) * label_radius
             y = center.y() + math.sin(angle) * label_radius
             displayed = index + 12 if afternoon else index
