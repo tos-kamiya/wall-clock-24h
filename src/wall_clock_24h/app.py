@@ -144,11 +144,11 @@ class WallClock(QWidget):
         hours12 = now.hour % 12 + minutes / 60
         # The original HTML percentages are relative to the dial diameter,
         # while ``radius`` is half of that diameter.
-        self._draw_hand(painter, center, radius * 0.51, radius * 0.042, hours12 * 30,
+        self._draw_hand(painter, center, radius * 0.5304, radius * 0.042, hours12 * 30,
                         QColor("#202226"), shadow_alpha=46)
-        self._draw_hand(painter, center, radius * 0.73, radius * 0.0264, minutes * 6,
+        self._draw_hand(painter, center, radius * 0.7592, radius * 0.0264, minutes * 6,
                         QColor("#5d6b78"), shadow_alpha=36)
-        self._draw_hand(painter, center, radius * 0.81, radius * 0.0108, seconds * 6,
+        self._draw_hand(painter, center, radius * 0.86751, radius * 0.0108, seconds * 6,
                         QColor("#d44949"), shadow_alpha=0)
         self._draw_hand(painter, center, radius * 0.18, radius * 0.0108, seconds * 6 + 180,
                         QColor("#d44949"), shadow_alpha=0, from_center=False)
