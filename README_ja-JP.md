@@ -30,10 +30,32 @@ wall-clock-24h
 
 ## 版の種類
 
-このリポジトリには、次の2種類が含まれています。
+このリポジトリには、次の3種類が含まれています。
 
 - `pipx` でインストールして `wall-clock-24h` として起動する PySide6 アプリ版
+- デスクトップの壁紙の上に載る GNOME Shell 拡張 [gnome-shell-extension](gnome-shell-extension)
 - ブラウザで開いて使えるスタンドアロン HTML 版 [wall-clock-24h.html](wall-clock-24h.html)
+
+## GNOME ウィジェット
+
+GNOME 版は、同じ 24 時間アナログ時計をデスクトップの壁紙（ウィンドウの後ろ）に描く Shell 拡張です。
+
+`gnome-shell-extension` ディレクトリからインストールします。
+
+```console
+./install.sh
+gnome-extensions enable wall-clock-24h@tos-kamiya.github.com
+```
+
+Wayland では、初回インストールのあとにログアウトして入り直し、そのあとで拡張を有効にしてください。
+
+有効化すると、次の操作ができます。
+
+- ドラッグして移動
+- 時計の上でスクロールしてサイズ変更
+- 右クリックで設定を開く
+
+GNOME Shell 45〜50 に対応しています。
 
 ## ライセンス
 

@@ -1,0 +1,10 @@
+{
+  "uuid": "wall-clock-24h@tos-kamiya.github.com",
+  "name": "24-hour Wall Clock",
+  "description": "A 24-hour analog wall clock on the GNOME desktop. Morning shows 0–11, afternoon shows 12–23, and the current hour is highlighted.",
+  "shell-version": ["45", "46", "47", "48", "49", "50"],
+  "url": "https://github.com/tos-kamiya/wall-clock-24h",
+  "settings-schema": "org.gnome.shell.extensions.wall-clock-24h",
+  "gettext-domain": "wall-clock-24h",
+  "version": 1
+}

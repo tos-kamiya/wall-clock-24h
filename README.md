@@ -30,10 +30,32 @@ The clock displays the system time zone and highlights the current hour.
 
 ## Editions
 
-This repository contains two editions:
+This repository contains three editions:
 
 - the PySide6 desktop application, installed with `pipx` and launched as `wall-clock-24h`;
+- the GNOME Shell desktop widget in [gnome-shell-extension](gnome-shell-extension);
 - the standalone browser version in [wall-clock-24h.html](wall-clock-24h.html).
+
+## GNOME widget
+
+The GNOME edition is a Shell extension. It draws the same 24-hour analog clock on the desktop wallpaper (behind windows).
+
+Install it from the `gnome-shell-extension` directory:
+
+```console
+./install.sh
+gnome-extensions enable wall-clock-24h@tos-kamiya.github.com
+```
+
+On Wayland, log out and back in after the first install, then enable the extension.
+
+Once it is running you can:
+
+- drag the clock to move it;
+- scroll on the clock to resize it;
+- right-click the clock to open the settings.
+
+The extension supports GNOME Shell 45–50.
 
 ## License
 

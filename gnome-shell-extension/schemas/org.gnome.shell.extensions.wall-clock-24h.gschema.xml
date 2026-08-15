@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.wall-clock-24h"
+          path="/org/gnome/shell/extensions/wall-clock-24h/">
+    <key name="x" type="i">
+      <default>-1</default>
+      <summary>X position</summary>
+      <description>Horizontal position relative to the primary monitor. -1 centers the clock.</description>
+    </key>
+    <key name="y" type="i">
+      <default>-1</default>
+      <summary>Y position</summary>
+      <description>Vertical position relative to the primary monitor. -1 centers the clock.</description>
+    </key>
+    <key name="size" type="i">
+      <default>400</default>
+      <range min="240" max="900"/>
+      <summary>Size</summary>
+      <description>Clock diameter in pixels.</description>
+    </key>
+    <key name="show-seconds" type="b">
+      <default>true</default>
+      <summary>Show seconds</summary>
+      <description>Whether to draw the second hand.</description>
+    </key>
+    <key name="show-timezone" type="b">
+      <default>true</default>
+      <summary>Show time zone</summary>
+      <description>Whether to draw the system time zone abbreviation.</description>
+    </key>
+  </schema>
+</schemalist>
