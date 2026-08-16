@@ -55,7 +55,12 @@ Once it is running you can:
 - scroll on the clock to resize it;
 - right-click the clock to open the settings.
 
-The panel menu (clock icon in the tray) toggles whether the clock stays just above the wallpaper or in front of all windows. Use the front layer to move it when Desktop Icons NG is enabled; switch back afterward so it sits on the wallpaper again.
+The panel menu (clock icon in the tray) can:
+
+- toggle whether the clock stays just above the wallpaper or in front of all windows;
+- switch the size between S (280px), M (400px), and L (560px).
+
+Use the front layer to move it when Desktop Icons NG is enabled; switch back afterward so it sits on the wallpaper again. You can still scroll on the clock for a custom size.
 
 The extension supports GNOME Shell 45–50.
 

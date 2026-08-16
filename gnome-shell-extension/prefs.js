@@ -23,7 +23,7 @@ export default class WallClock24hPreferences extends ExtensionPreferences {
 
         const sizeRow = new Adw.SpinRow({
             title: _('Size'),
-            subtitle: _('Clock diameter in pixels. You can also scroll on the clock.'),
+            subtitle: _('Clock diameter in pixels. Presets: S 280, M 400, L 560. You can also scroll on the clock.'),
             adjustment: new Gtk.Adjustment({
                 lower: 240,
                 upper: 900,

@@ -9,6 +9,12 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import {drawClock, readNow} from './clockDraw.js';
 
+const SIZE_PRESETS = {
+    S: 280,
+    M: 400,
+    L: 560,
+};
+
 function createIndicator(extension) {
     const settings = extension.getSettings();
     const indicator = new PanelMenu.Button(0.5, extension.metadata.name, false);
@@ -31,6 +37,30 @@ function createIndicator(extension) {
     });
     indicator.menu.addMenuItem(frontItem);
 
+    indicator.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem(_('Size')));
+
+    const sizeItems = {};
+    for (const [name, value] of Object.entries(SIZE_PRESETS)) {
+        const item = new PopupMenu.PopupMenuItem(name);
+        item.connect('activate', () => {
+            settings.set_int('size', value);
+        });
+        indicator.menu.addMenuItem(item);
+        sizeItems[name] = item;
+    }
+
+    const syncSizeOrnaments = () => {
+        const size = settings.get_int('size');
+        for (const [name, item] of Object.entries(sizeItems)) {
+            item.setOrnament(
+                SIZE_PRESETS[name] === size
+                    ? PopupMenu.Ornament.DOT
+                    : PopupMenu.Ornament.NONE
+            );
+        }
+    };
+    syncSizeOrnaments();
+
     indicator.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
     const prefsItem = new PopupMenu.PopupMenuItem(_('Settings'));
@@ -49,6 +79,7 @@ function createIndicator(extension) {
             if (frontItem.state !== value)
                 frontItem.setToggleState(value);
         },
+        'changed::size', () => syncSizeOrnaments(),
         indicator
     );
 
