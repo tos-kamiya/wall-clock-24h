@@ -28,5 +28,10 @@
       <summary>Show time zone</summary>
       <description>Whether to draw the system time zone abbreviation.</description>
     </key>
+    <key name="above-windows" type="b">
+      <default>false</default>
+      <summary>In front of windows</summary>
+      <description>If true, the clock stays in front of all windows. If false, it stays just above the wallpaper.</description>
+    </key>
   </schema>
 </schemalist>

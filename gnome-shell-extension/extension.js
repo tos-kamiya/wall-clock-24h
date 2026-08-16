@@ -2,10 +2,58 @@ import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
 import St from 'gi://St';
 
-import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
+import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 import {drawClock, readNow} from './clockDraw.js';
+
+function createIndicator(extension) {
+    const settings = extension.getSettings();
+    const indicator = new PanelMenu.Button(0.5, extension.metadata.name, false);
+
+    const box = new St.BoxLayout({
+        style_class: 'panel-status-menu-box',
+    });
+    box.add_child(new St.Icon({
+        icon_name: 'preferences-system-time-symbolic',
+        style_class: 'system-status-icon',
+    }));
+    indicator.add_child(box);
+
+    const frontItem = new PopupMenu.PopupSwitchMenuItem(
+        _('In front of windows'),
+        settings.get_boolean('above-windows')
+    );
+    frontItem.connect('toggled', (_item, state) => {
+        settings.set_boolean('above-windows', state);
+    });
+    indicator.menu.addMenuItem(frontItem);
+
+    indicator.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+    const prefsItem = new PopupMenu.PopupMenuItem(_('Settings'));
+    prefsItem.connect('activate', () => {
+        try {
+            extension.openPreferences();
+        } catch (error) {
+            console.error('[wall-clock-24h] failed to open preferences', error);
+        }
+    });
+    indicator.menu.addMenuItem(prefsItem);
+
+    settings.connectObject(
+        'changed::above-windows', () => {
+            const value = settings.get_boolean('above-windows');
+            if (frontItem.state !== value)
+                frontItem.setToggleState(value);
+        },
+        indicator
+    );
+
+    return indicator;
+}
 
 class DesktopClock {
     constructor(extension) {
@@ -14,6 +62,7 @@ class DesktopClock {
         this._drag = null;
         this._grab = null;
         this._timeoutId = 0;
+        this._raiseId = 0;
 
         this._container = new St.Widget({
             name: 'wall-clock-24h-container',
@@ -42,15 +91,20 @@ class DesktopClock {
             'changed::y', () => this._applyPosition(),
             'changed::show-seconds', () => this._actor.queue_repaint(),
             'changed::show-timezone', () => this._actor.queue_repaint(),
+            'changed::above-windows', () => this._applyLayer(),
             this
         );
         Main.layoutManager.connectObject(
             'monitors-changed', () => this._relayout(),
             this
         );
+        global.display.connectObject(
+            'restacked', () => this._queueRaise(),
+            this
+        );
 
+        this._applyLayer();
         this._relayout();
-        this._addToDesktop();
 
         this._timeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
             this._actor.queue_repaint();
@@ -58,12 +112,35 @@ class DesktopClock {
         });
     }
 
-    _addToDesktop() {
-        const bgGroup = Main.layoutManager._backgroundGroup;
-        if (bgGroup)
-            bgGroup.add_child(this._container);
-        else
-            Main.layoutManager.uiGroup.insert_child_at_index(this._container, 0);
+    _applyLayer() {
+        const parent = this._container.get_parent();
+        if (parent)
+            parent.remove_child(this._container);
+
+        if (this._settings.get_boolean('above-windows')) {
+            Main.layoutManager.uiGroup.add_child(this._container);
+            this._container.raise_top();
+        } else {
+            const bgGroup = Main.layoutManager._backgroundGroup;
+            if (bgGroup)
+                bgGroup.add_child(this._container);
+            else
+                Main.layoutManager.uiGroup.insert_child_at_index(this._container, 0);
+        }
+        this._relayout();
+    }
+
+    _queueRaise() {
+        if (!this._settings.get_boolean('above-windows'))
+            return;
+        if (this._raiseId)
+            return;
+        this._raiseId = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+            this._raiseId = 0;
+            if (this._container.get_parent() === Main.layoutManager.uiGroup)
+                this._container.raise_top();
+            return GLib.SOURCE_REMOVE;
+        });
     }
 
     _primaryMonitor() {
@@ -219,18 +296,34 @@ class DesktopClock {
             GLib.Source.remove(this._timeoutId);
             this._timeoutId = 0;
         }
+        if (this._raiseId) {
+            GLib.Source.remove(this._raiseId);
+            this._raiseId = 0;
+        }
         this._settings.disconnectObject(this);
         Main.layoutManager.disconnectObject(this);
+        global.display.disconnectObject(this);
         this._container.destroy();
     }
 }
 
 export default class WallClock24hExtension extends Extension {
     enable() {
-        this._clock = new DesktopClock(this);
+        try {
+            this._clock = new DesktopClock(this);
+            if (Main.panel.statusArea[this.uuid])
+                Main.panel.statusArea[this.uuid].destroy();
+            this._indicator = createIndicator(this);
+            Main.panel.addToStatusArea(this.uuid, this._indicator, 1, 'right');
+        } catch (error) {
+            console.error('[wall-clock-24h] enable failed', error);
+            throw error;
+        }
     }
 
     disable() {
+        this._indicator?.destroy();
+        this._indicator = null;
         this._clock?.destroy();
         this._clock = null;
     }

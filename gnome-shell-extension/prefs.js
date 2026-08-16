@@ -10,7 +10,7 @@ export default class WallClock24hPreferences extends ExtensionPreferences {
         window._settings = settings;
         window.title = _('24-hour Wall Clock');
         window.default_width = 520;
-        window.default_height = 360;
+        window.default_height = 420;
 
         const page = new Adw.PreferencesPage({
             title: _('Clock'),
@@ -54,6 +54,13 @@ export default class WallClock24hPreferences extends ExtensionPreferences {
             title: _('Position'),
             description: _('Drag the clock to move it. Right-click it to open these settings.'),
         });
+
+        const frontRow = new Adw.SwitchRow({
+            title: _('In front of windows'),
+            subtitle: _('When off, the clock stays just above the wallpaper. When on, it stays in front of windows so you can drag it.'),
+        });
+        settings.bind('above-windows', frontRow, 'active', Gio.SettingsBindFlags.DEFAULT);
+        position.add(frontRow);
 
         const resetRow = new Adw.ActionRow({
             title: _('Reset position'),

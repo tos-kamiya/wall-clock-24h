@@ -6,5 +6,5 @@
   "url": "https://github.com/tos-kamiya/wall-clock-24h",
   "settings-schema": "org.gnome.shell.extensions.wall-clock-24h",
   "gettext-domain": "wall-clock-24h",
-  "version": 1
+  "version": 2
 }
