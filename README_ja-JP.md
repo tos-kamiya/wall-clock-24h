@@ -1,18 +1,24 @@
 # wall-clock-24h
 
-PySide6 で作られた、フレームレス・半透明の24時間表示壁掛け時計です。
+24時間表示のアナログ壁掛け時計です。午前は 0–11、午後は 12–23 で、現在時の数字を強調します。
 
 ![wall-clock-24h のスクリーンショット](screenshot1.png)
 
-## インストール
+## 版の種類
+
+このリポジトリには、次の3種類が含まれています。
+
+- `pipx` でインストールして `wall-clock-24h` として起動する PySide6 アプリ版
+- デスクトップの壁紙の上に載る GNOME Shell 拡張 [gnome-shell-extension](gnome-shell-extension)
+- ブラウザで開いて使えるスタンドアロン HTML 版 [wall-clock-24h.html](wall-clock-24h.html)（そのファイルをブラウザで開きます）
+
+## デスクトップアプリ
 
 [pipx](https://pipx.pypa.io/) を使って、GitHub から直接インストールできます。
 
 ```console
 pipx install git+https://github.com/tos-kamiya/wall-clock-24h.git
 ```
-
-## 使い方
 
 以下のコマンドで起動します。
 
@@ -27,14 +33,6 @@ wall-clock-24h
 - 左上のハンバーガーメニューからバージョン表示または終了
 
 システムのタイムゾーンを表示し、現在時の数字を強調します。
-
-## 版の種類
-
-このリポジトリには、次の3種類が含まれています。
-
-- `pipx` でインストールして `wall-clock-24h` として起動する PySide6 アプリ版
-- デスクトップの壁紙の上に載る GNOME Shell 拡張 [gnome-shell-extension](gnome-shell-extension)
-- ブラウザで開いて使えるスタンドアロン HTML 版 [wall-clock-24h.html](wall-clock-24h.html)
 
 ## GNOME ウィジェット
 
