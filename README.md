@@ -1,6 +1,6 @@
 # wall-clock-24h
 
-A 24-hour analog wall clock. Morning shows 0–11, afternoon shows 12–23, and the current hour is highlighted.
+A 24-hour analog wall clock. Morning shows 0–11, afternoon shows 12–23, and the current hour is highlighted. The dial also shows the date.
 
 ![wall-clock-24h screenshot](screenshot1.png)
 
