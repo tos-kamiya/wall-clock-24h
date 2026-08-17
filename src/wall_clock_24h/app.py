@@ -14,6 +14,11 @@ from PySide6.QtWidgets import QApplication, QMenu, QMessageBox, QToolButton, QWi
 from .__about__ import __version__
 
 _WEEKDAYS = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+_SIZE_PRESETS = {
+    "S": 280,
+    "M": 400,
+    "L": 560,
+}
 
 
 def _format_date(now: datetime) -> str:
@@ -27,7 +32,7 @@ class WallClock(QWidget):
         super().__init__()
         self.setWindowTitle("24-hour Wall Clock")
         self.setMinimumSize(280, 280)
-        self.resize(760, 760)
+        self.resize(400, 400)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self._drag_offset: QPoint | None = None
@@ -69,11 +74,27 @@ class WallClock(QWidget):
         version_action = QAction("About", menu)
         version_action.triggered.connect(self._show_version)
         menu.addAction(version_action)
+        menu.addSection("Size")
+        current = min(self.width(), self.height())
+        for name, size in _SIZE_PRESETS.items():
+            action = QAction(name, menu)
+            action.setCheckable(True)
+            action.setChecked(current == size)
+            action.triggered.connect(lambda _checked=False, s=size: self._apply_preset_size(s))
+            menu.addAction(action)
         menu.addSeparator()
         quit_action = QAction("Quit", menu)
         quit_action.triggered.connect(self.close)
         menu.addAction(quit_action)
         menu.exec(self._menu_button.mapToGlobal(QPoint(0, self._menu_button.height())))
+
+    def _apply_preset_size(self, size: int) -> None:
+        geo = self.frameGeometry()
+        center = geo.center()
+        self.resize(size, size)
+        geo = self.frameGeometry()
+        geo.moveCenter(center)
+        self.move(geo.topLeft())
 
     def _show_version(self) -> None:
         QMessageBox.information(
