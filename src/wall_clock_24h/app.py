@@ -13,6 +13,12 @@ from PySide6.QtWidgets import QApplication, QMenu, QMessageBox, QToolButton, QWi
 
 from .__about__ import __version__
 
+_WEEKDAYS = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+
+
+def _format_date(now: datetime) -> str:
+    return f"{now:%m/%d}({_WEEKDAYS[now.weekday()]})"
+
 
 class WallClock(QWidget):
     """Paint the clock directly, leaving the area around the dial transparent."""
@@ -160,6 +166,17 @@ class WallClock(QWidget):
 
         # Keep labels above the hands so they remain legible.
         self._draw_labels(painter, center, gradient_radius, now.hour)
+
+        date_font = QFont("Monospace")
+        date_font.setStyleHint(QFont.StyleHint.TypeWriter)
+        date_font.setPixelSize(max(18, round(radius * 0.095)))
+        painter.setFont(date_font)
+        date_rect = QRectF(center.x() - radius * 0.45, center.y() - radius * 0.278,
+                           radius * 0.9, radius * 0.14)
+        self._draw_outlined_text(
+            painter, date_rect, _format_date(now), Qt.AlignmentFlag.AlignCenter,
+            QColor("#434a52"), max(2.0, radius * 0.010)
+        )
 
         painter.setPen(QColor("#b4b8bc"))
         font = QFont("Sans Serif")

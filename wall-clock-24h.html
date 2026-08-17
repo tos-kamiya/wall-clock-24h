@@ -190,6 +190,24 @@
     z-index: 4;
   }
 
+  .date {
+    position: absolute;
+    left: 50%;
+    top: calc(42% - 0.5em);
+    transform: translateX(-50%);
+    color: var(--digital);
+    font: 500 clamp(22px, 4.6vmin, 42px)/1 ui-monospace, SFMono-Regular,
+          Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    letter-spacing: .02em;
+    white-space: nowrap;
+    z-index: 5;
+    text-shadow:
+      -1px -1px 0 rgba(255,255,255,.7), 0 -1px 0 rgba(255,255,255,.7),
+      1px -1px 0 rgba(255,255,255,.7), -1px 0 0 rgba(255,255,255,.7),
+      1px 0 0 rgba(255,255,255,.7), -1px 1px 0 rgba(255,255,255,.7),
+      0 1px 0 rgba(255,255,255,.7), 1px 1px 0 rgba(255,255,255,.7);
+  }
+
   .brand {
     position: absolute;
     left: 50%;
@@ -209,6 +227,7 @@
 <body>
   <main class="clock" id="clock" aria-label="24-hour analog wall clock">
     <div class="dial-center"></div>
+    <div class="date" id="dateLabel"></div>
     <div class="brand" id="timezoneLabel">UTC</div>
     <div class="hand hour-hand" id="hourHand"></div>
     <div class="hand minute-hand" id="minuteHand"></div>
@@ -224,7 +243,9 @@
   const minuteHand = document.getElementById("minuteHand");
   const secondHand = document.getElementById("secondHand");
   const secondTail = document.getElementById("secondTail");
+  const dateLabel = document.getElementById("dateLabel");
   const timezoneLabel = document.getElementById("timezoneLabel");
+  const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   // 外周の60目盛り
   for (let i = 0; i < 60; i++) {
@@ -276,6 +297,12 @@
     clock.style.setProperty("--dial-background", dialBackground);
   }
 
+  function formatDate(now) {
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${month}/${day}(${WEEKDAYS[now.getDay()]})`;
+  }
+
   function getSystemTimeZone(now) {
     const parts = new Intl.DateTimeFormat("en-US", {
       timeZoneName: "short"
@@ -286,6 +313,7 @@
   }
 
   let lastHour = -1;
+  let lastDate = "";
   let lastTimeZone = "";
 
   function draw() {
@@ -309,6 +337,12 @@
     if (currentHour !== lastHour) {
       updateHourLabels(currentHour);
       lastHour = currentHour;
+    }
+
+    const dateText = formatDate(now);
+    if (dateText !== lastDate) {
+      dateLabel.textContent = dateText;
+      lastDate = dateText;
     }
 
     const timeZone = getSystemTimeZone(now);

@@ -15,6 +15,8 @@ const FRAME_EDGE = hexToRgb('#e4e5e6');
 const LABEL = hexToRgb('#434a52');
 const LABEL_ACTIVE = hexToRgb('#111820');
 const TIMEZONE = hexToRgb('#b4b8bc');
+const DATE = hexToRgb('#434a52');
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 function hexToRgb(hex) {
     const n = parseInt(hex.slice(1), 16);
@@ -107,11 +109,15 @@ function drawHand(cr, cx, cy, length, width, degrees, rgb, shadowAlpha, fromCent
 
 export function readNow() {
     const now = GLib.DateTime.new_now_local();
+    const month = String(now.get_month()).padStart(2, '0');
+    const day = String(now.get_day_of_month()).padStart(2, '0');
+    const weekday = WEEKDAYS[now.get_day_of_week() - 1];
     return {
         hour: now.get_hour(),
         minute: now.get_minute(),
         second: now.get_second() + now.get_microsecond() / 1_000_000,
         timezone: now.get_timezone_abbreviation() || 'UTC',
+        date: `${month}/${day}(${weekday})`,
     };
 }
 
@@ -204,6 +210,17 @@ export function drawClock(cr, width, height, now, {showSeconds = true, showTimez
             active ? Pango.Weight.BOLD : Pango.Weight.NORMAL
         );
     }
+
+    drawOutlinedText(
+        cr,
+        now.date,
+        cx,
+        cy - radius * 0.208,
+        Math.max(18, radius * 0.095),
+        DATE,
+        Math.max(2, radius * 0.010),
+        Pango.Weight.NORMAL
+    );
 
     if (showTimezone) {
         drawOutlinedText(
